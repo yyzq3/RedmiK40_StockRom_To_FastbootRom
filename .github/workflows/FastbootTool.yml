@@ -67,4 +67,4 @@ jobs:
       run: |
         cd ~
         curl -sL https://git.io/file-transfer | sh
-        ./transfer wet $ROM_Version.7z
+        ./transfer wss $ROM_Version.7z
