@@ -1,0 +1,70 @@
+name: get_bootimg_from_payload.bin
+
+on:
+  watch:
+    types: [started]
+    
+env:
+  ROM_URL: https://hugeota.d.miui.com/21.4.28/miui_ALIOTH_21.4.28_1f0f77d4e4_11.0.zip
+  ROM_Version: miui21.4.28
+  TZ: Asia/Shanghai
+
+jobs:
+  make:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: install Python 3.7
+      uses: actions/setup-python@v1
+      with:
+          python-version: 3.7
+    - name: Initialization environment 
+      run: |
+        cd ~
+        sudo -E apt-get -qq update
+        sudo -E apt-get -qq install p7zip gzip
+        pip install bsdiff4
+        python -m pip install protobuf
+
+    - name: Clean Up Disk Space
+      run: |
+        docker rmi `docker images -q`
+        sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d
+        sudo -E apt-get -y purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* mysql* php*
+        sudo -E apt-get -y autoremove --purge
+        sudo -E apt-get clean 
+        
+    - name: Clone the tools source code
+      run: |
+       cd ~
+       git clone https://github.com/vm03/payload_dumper.git
+       git clone https://github.com/yyzq2/RedmiK40FastbootFlashTool.git
+  
+    - name: 下载ROM
+      run: |
+       cd ~
+       wget -O rom.zip $ROM_URL
+   
+    - name: 解压ROM
+      run: |
+       cd ~
+       unzip rom.zip -d payload_dumper
+    
+    - name: 解包payload.bin
+      run: |
+       cd ~
+       cd payload_dumper
+       python payload_dumper.py payload.bin
+   
+    - name: 打包为线刷包
+      run: |
+       cd ~
+       mv ~/payload_dumper/output/* ~/RedmiK40FastbootFlashTool/images
+       7za a -t7z -r $ROM_Version.7z ~/RedmiK40FastbootFlashTool/*
+    
+    - name: Upload to WeTransfer
+      run: |
+        cd ~
+        curl -sL https://git.io/file-transfer | sh
+        ./transfer wet $ROM_Version.7z
