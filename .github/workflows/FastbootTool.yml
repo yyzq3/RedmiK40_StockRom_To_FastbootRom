@@ -61,10 +61,12 @@ jobs:
       run: |
        cd ~
        mv ~/payload_dumper/output/* ~/RedmiK40FastbootFlashTool/images
-       7za a -t7z -r $ROM_Version.7z ~/RedmiK40FastbootFlashTool/*
+       7za a -v2g -r $ROM_Version.7z ~/RedmiK40FastbootFlashTool/*
     
     - name: Upload to WeTransfer
       run: |
         cd ~
         curl -sL https://git.io/file-transfer | sh
-        ./transfer tmp -t znk2p3hdfywtsd0k2mwq $ROM_Version.7z
+        ./transfer wet $ROM_Version.7z.001
+        ./transfer wet $ROM_Version.7z.002
+
