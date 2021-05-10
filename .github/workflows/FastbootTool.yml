@@ -1,4 +1,4 @@
-name: get_bootimg_from_payload.bin
+name: 卡刷包转线刷包
 
 on:
   watch:
